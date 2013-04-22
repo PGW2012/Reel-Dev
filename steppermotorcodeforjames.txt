@@ -1,0 +1,48 @@
+// Unscented Kalman Filter File
+// Created by Dan Kassen
+// Hand-Converted to C from Matlab file written by previous senior design team
+
+#include <stm32f4xx.h>
+#include <misc.h>			
+#include <stm32f4xx_usart.h>
+#include <stm32f4xx_spi.h>
+#include <stm32f4xx_tim.h>
+#include <stm32f4xx_flash.h>
+#include "arm_math.h" 
+#include "math_helper.h" 
+#include "stm32f4_discovery.h"
+
+void init_GPIO(void); // gpio for debugging
+
+void Delay(__IO uint32_t nCount) {
+   while(nCount--) {
+  }
+}
+
+int main(void){
+	init_GPIO();
+	
+	GPIOB->BSRRL |= GPIO_Pin_1; // set pin high, default direction
+	
+	while(1){
+		GPIOB->BSRRH |= GPIO_Pin_0; // set pin low
+		Delay(3600); // delay, 36 is 1 microsecond
+		GPIOB->BSRRL |= GPIO_Pin_0; // set pin high
+		Delay(3600); // delay, 36 is 1 microsecond
+	}
+}
+
+
+void init_GPIO(void){
+
+	GPIO_InitTypeDef GPIO_InitStruct;
+
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1; // we want to configure all LED GPIO pins
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT; 		// we want the pins to be an output
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_2MHz; 	// this sets the GPIO modules clock speed
+	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP; 	// this sets the pin type to push / pull (as opposed to open drain)
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL; 	// this sets the pullup / pulldown resistors to be inactive
+	GPIO_Init(GPIOB, &GPIO_InitStruct); 			// this finally passes all the values to the GPIO_Init function which takes care of setting the corresponding bits.
+}
